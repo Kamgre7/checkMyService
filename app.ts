@@ -1,10 +1,13 @@
-import { CronJob } from 'cron';
-import { CRON_EVERY_10_SEC } from './utils/utils';
-import { checkMyService } from './utils/CheckMyService';
+import express from 'express';
+import { config } from './config/default';
+import { cronJob } from './utils/cronJob';
 
-const cronJob = new CronJob(
-  CRON_EVERY_10_SEC,
-  async () => await checkMyService.trackWebsiteStatus()
-);
+const app = express();
+
+app.use(express.json());
 
 cronJob.start();
+
+app.listen(config.port, config.hostName, () => {
+  console.log(`Listening on port ${config.host}:${config.port}`);
+});
