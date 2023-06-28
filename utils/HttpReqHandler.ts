@@ -1,34 +1,57 @@
-import axios from 'axios';
-import { httpStatusCodeRegex } from './regEx';
+import axios, { isAxiosError } from 'axios';
+import { httpStatusCodeRegex } from './utils';
 
 export enum HttpPageStatus {
-  UP = 'UP',
+  RUNNING = 'RUNNING',
   DOWN = 'DOWN',
 }
 
+export type WebsiteInfo = {
+  name: string;
+  statusCode: number;
+  statusInfo: string;
+  time: number;
+};
+
 export interface IHttpReqHandler {
-  getSinglePageStatus(url: string): Promise<string>;
-  getPagesStatus(data: string[]): Promise<string[]>;
+  getSinglePageStatus(url: string): Promise<WebsiteInfo>;
+  getPagesStatus(data: string[]): Promise<WebsiteInfo[]>;
 }
 
 export class HttpReqHandler implements IHttpReqHandler {
   constructor() {}
 
-  async getPagesStatus(data: string[]): Promise<string[]> {
+  async getPagesStatus(data: string[]): Promise<WebsiteInfo[]> {
     return await Promise.all(
       data.map(async (link) => await this.getSinglePageStatus(link))
     );
   }
 
-  async getSinglePageStatus(url: string): Promise<string> {
+  async getSinglePageStatus(url: string): Promise<WebsiteInfo> {
     try {
       const { status } = await axios.get(url);
 
-      return httpStatusCodeRegex.test(String(status))
-        ? HttpPageStatus.UP
+      const httpStatus = httpStatusCodeRegex.test(String(status))
+        ? HttpPageStatus.RUNNING
         : HttpPageStatus.DOWN;
+
+      return {
+        name: url,
+        statusCode: status,
+        statusInfo: httpStatus,
+        time: Date.now(),
+      };
     } catch (err) {
-      return HttpPageStatus.DOWN;
+      if (isAxiosError(err)) {
+        return {
+          name: url,
+          statusCode: err.status ?? 500,
+          statusInfo: HttpPageStatus.DOWN,
+          time: Date.now(),
+        };
+      }
+
+      throw err;
     }
   }
 }
