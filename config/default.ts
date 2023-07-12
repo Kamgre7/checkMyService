@@ -9,4 +9,5 @@ export const config = ConfigSchema.parse({
   port: process.env.PORT,
   host: process.env.HOST,
   hostName: process.env.HOST_NAME,
+  dbFilename: process.env.DB_FILENAME,
 });
