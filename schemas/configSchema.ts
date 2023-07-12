@@ -9,4 +9,5 @@ export const ConfigSchema = z.object({
     .transform((arg) => (isNaN(parseInt(arg)) ? 3001 : Number(arg))),
   host: z.string().nonempty(),
   hostName: z.string().nonempty(),
+  dbFilename: z.string().nonempty(),
 });
