@@ -140,3 +140,5 @@ dist
 .svelte-kit
 .vscode
 
+db/db.sqlite
+csv/websiteStatus.csv
