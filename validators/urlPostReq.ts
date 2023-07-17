@@ -1,4 +1,4 @@
-import { validatePostReq } from '../middlewares/validatePostReq';
+import { validateReq } from '../middlewares/validateReq';
 import { PostUrlSchema } from '../schemas/postUrlSchema';
 
-export const validateUrlPostReq = validatePostReq(PostUrlSchema);
+export const validateUrlPostReq = validateReq(PostUrlSchema);
