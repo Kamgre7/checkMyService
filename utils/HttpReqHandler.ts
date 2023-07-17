@@ -21,9 +21,9 @@ export interface IHttpReqHandler {
 export class HttpReqHandler implements IHttpReqHandler {
   constructor() {}
 
-  async getPagesStatus(data: string[]): Promise<WebsiteInfo[]> {
+  async getPagesStatus(urls: string[]): Promise<WebsiteInfo[]> {
     return await Promise.all(
-      data.map(async (link) => await this.getSinglePageStatus(link))
+      urls.map(async (url) => await this.getSinglePageStatus(url))
     );
   }
 
