@@ -1,8 +1,10 @@
 import { IUrlRepository, urlRepository } from '../repository/UrlRepository';
+import { getHostName } from '../utils/utils';
 
 export interface IUrlService {
   insert(url: string): Promise<string>;
   deactivateUrl(id: string): Promise<void>;
+  getUrlById(id: string): Promise<string>;
 }
 
 export class UrlService implements IUrlService {
@@ -16,6 +18,12 @@ export class UrlService implements IUrlService {
 
   async deactivateUrl(id: string): Promise<void> {
     await this.urlRepository.deactivateUrl(id);
+  }
+
+  async getUrlById(id: string): Promise<string> {
+    const url = await this.urlRepository.getUrlById(id);
+
+    return getHostName(url);
   }
 }
 
