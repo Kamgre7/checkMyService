@@ -7,6 +7,7 @@ export interface IUrlRepository {
   insert(url: string): Promise<string>;
   getAllUrls(): Promise<UrlRecord[]>;
   getActiveUrls(): Promise<string[]>;
+  getUrlById(id: string): Promise<string>;
   deactivateUrl(id: string): Promise<void>;
 }
 
@@ -79,6 +80,28 @@ export class UrlRepository implements IUrlRepository {
     );
 
     return data.map(({ url }) => url);
+  }
+
+  async getUrlById(id: string): Promise<string> {
+    verbose();
+
+    const db = await createDbConnection();
+
+    const { url } = (await db.get(
+      'SELECT url FROM url_list WHERE id = ?',
+      [id],
+      function (err: Error, row: string) {
+        if (err) {
+          throw err;
+        }
+
+        if (row === undefined) {
+          throw new Error('');
+        }
+      }
+    )) as { url: string };
+
+    return url;
   }
 
   async deactivateUrl(id: string): Promise<void> {
