@@ -1,5 +1,5 @@
 import express from 'express';
-import { config } from './src/config/default';
+import { appConfig } from './src/config/appConfig';
 import { cronJob } from './src/domains/website/cron/cronJob';
 import { urlRouter } from './src/routes/urlRouter';
 
@@ -11,6 +11,6 @@ cronJob.start();
 
 app.use('/', urlRouter);
 
-app.listen(config.port, config.hostName, () => {
-  console.log(`Listening on port ${config.host}:${config.port}`);
+app.listen(appConfig.port, appConfig.hostName, () => {
+  console.log(`Listening on port ${appConfig.host}:${appConfig.port}`);
 });
