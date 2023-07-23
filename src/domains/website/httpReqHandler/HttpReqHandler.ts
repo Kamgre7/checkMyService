@@ -1,5 +1,6 @@
 import axios, { isAxiosError } from 'axios';
 import { httpStatusCodeRegex } from '../../../utils/utils';
+import { getCurrentDate } from '../../../utils/getCurrentDate';
 
 export enum HttpPageStatus {
   RUNNING = 'RUNNING',
@@ -10,7 +11,7 @@ export type WebsiteInfo = {
   name: string;
   statusCode: number;
   statusInfo: string;
-  time: Date;
+  time: string;
 };
 
 export interface IHttpReqHandler {
@@ -37,7 +38,7 @@ export class HttpReqHandler implements IHttpReqHandler {
         name: url,
         statusCode: status,
         statusInfo: httpStatus,
-        time: new Date(),
+        time: getCurrentDate(),
       };
     } catch (err) {
       if (isAxiosError(err)) {
@@ -45,7 +46,7 @@ export class HttpReqHandler implements IHttpReqHandler {
           name: url,
           statusCode: err.status ?? 500,
           statusInfo: HttpPageStatus.DOWN,
-          time: new Date(),
+          time: getCurrentDate(),
         };
       }
 
