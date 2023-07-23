@@ -10,5 +10,7 @@ datasource db {
 model UrlList {
   id        String  @id @unique @default(uuid())
   url       String  @unique 
-  isActive  Boolean @default(true)
+  isActive  Boolean 
+
+  @@map(name: "url_list")
 }
