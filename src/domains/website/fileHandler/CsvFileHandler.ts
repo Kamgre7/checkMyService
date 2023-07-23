@@ -1,22 +1,22 @@
 import { join } from 'path';
-import { config } from '../../../config/default';
+import { appConfig } from '../../../config/appConfig';
 import { WebsiteInfo } from '../httpReqHandler/HttpReqHandler';
 import { createObjectCsvWriter } from 'csv-writer';
 import { getHostName } from '../../../utils/getHostName';
 
-export interface IFileHandler {
+export interface ICsvFileHandler {
   saveSingleStatusToCsv(statuses: WebsiteInfo, path: string): Promise<void>;
   pagesStatusToCsv(statuses: WebsiteInfo[]): Promise<void>;
 }
 
-export class FileHandler implements IFileHandler {
+export class CsvFileHandler implements ICsvFileHandler {
   constructor() {}
 
   async pagesStatusToCsv(statuses: WebsiteInfo[]): Promise<void> {
     await Promise.all(
       statuses.map(async (websiteInfo) => {
         const host = getHostName(websiteInfo.name);
-        const csvFilePath = join(config.csvFilePath, `${host}.csv`);
+        const csvFilePath = join(appConfig.csvFilePath, `${host}.csv`);
 
         await this.saveSingleStatusToCsv(websiteInfo, csvFilePath);
       })
@@ -42,4 +42,4 @@ export class FileHandler implements IFileHandler {
   }
 }
 
-export const fileHandler = new FileHandler();
+export const csvFileHandler = new CsvFileHandler();
