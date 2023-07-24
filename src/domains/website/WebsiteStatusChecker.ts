@@ -1,5 +1,12 @@
-import { IUrlRepository, UrlRepository } from './repository/UrlRepository';
-import { IFileHandler, fileHandler } from './fileHandler/FileHandler';
+import {
+  IUrlRepository,
+  UrlRecord,
+  UrlRepository,
+} from './repository/UrlRepository';
+import {
+  ICsvFileHandler,
+  csvFileHandler,
+} from './csvFileHandler/CsvFileHandler';
 import {
   IHttpReqHandler,
   WebsiteInfo,
@@ -14,23 +21,29 @@ export class WebsiteStatusChecker implements IWebsiteStatusChecker {
   constructor(
     private readonly httpReqHandler: IHttpReqHandler,
     private readonly urlRepository: IUrlRepository,
-    private readonly fileHandler: IFileHandler
+    private readonly csvFileHandler: ICsvFileHandler
   ) {}
 
   async trackWebsiteStatus(): Promise<void> {
-    const urls = await this.urlRepository.getActiveUrlsName();
-    const urlsStatusInfo = await this.httpReqHandler.getPagesStatus(urls);
+    const urls = await this.urlRepository.getActive();
+    const urlNames = this.getUrlNameFromRecords(urls);
+
+    const urlsStatusInfo = await this.httpReqHandler.getPagesStatus(urlNames);
 
     await this.saveStatusToCsv(urlsStatusInfo);
   }
 
   private async saveStatusToCsv(urlsStatusInfo: WebsiteInfo[]): Promise<void> {
-    await this.fileHandler.pagesStatusToCsv(urlsStatusInfo);
+    await this.csvFileHandler.pagesStatusToCsv(urlsStatusInfo);
+  }
+
+  private getUrlNameFromRecords(urls: UrlRecord[]): string[] {
+    return urls.map(({ url }) => url);
   }
 }
 
 export const websiteStatusChecker = new WebsiteStatusChecker(
   httpReqHandler,
   new UrlRepository(),
-  fileHandler
+  csvFileHandler
 );
