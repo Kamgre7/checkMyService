@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { PostUrlReq } from '../schemas/postUrlSchema';
 import { IUrlService, urlService } from '../services/UrlService';
 import { PutUrlReq } from '../schemas/putUrlSchema';
-import { config } from '../../../config/default';
+import { appConfig } from '../../../config/appConfig';
 import { GetUrlReq } from '../schemas/getUrlSchema';
 import { join } from 'path';
 
@@ -32,8 +32,8 @@ export class UrlController implements IUrlController {
   downloadCsv = async (req: GetUrlReq, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const url = await this.urlService.getUrlById(id);
-    const path = join(config.csvFilePath, `${url}.csv`);
+    const url = await this.urlService.getById(id);
+    const path = join(appConfig.csvFilePath, `${url}.csv`);
 
     res.download(path, (err) => {
       if (err) {
