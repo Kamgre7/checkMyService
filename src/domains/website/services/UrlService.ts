@@ -1,39 +1,65 @@
+import { Prisma } from '@prisma/client';
 import { getHostName } from '../../../utils/getHostName';
-import { IUrlRepository, urlRepository } from '../repository/UrlRepository';
+import {
+  IUrlRepository,
+  UrlRecord,
+  urlRepository,
+} from '../repository/UrlRepository';
 
 export interface IUrlService {
   insert(url: string): Promise<string>;
   deactivateUrl(id: string): Promise<void>;
-  getUrlById(id: string): Promise<string>;
+  getById(id: string): Promise<string>;
 }
 
 export class UrlService implements IUrlService {
   constructor(private readonly urlRepository: IUrlRepository) {}
 
   async insert(url: string): Promise<string> {
-    const recordExist = await this.urlRepository.getUrlByName(url);
+    try {
+      return await this.urlRepository.insert(url);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        return await this.tryToActivate(url);
+      }
 
-    if (recordExist) {
-      throw new Error(`${url} already exists)`);
+      throw error;
     }
-
-    const id = await this.urlRepository.insert(url);
-
-    return id;
   }
 
   async deactivateUrl(id: string): Promise<void> {
-    await this.urlRepository.deactivateUrl(id);
+    await this.urlRepository.updateByContext(id, {
+      isActive: false,
+    });
   }
 
-  async getUrlById(id: string): Promise<string> {
-    const url = await this.urlRepository.getUrlById(id);
+  async getById(id: string): Promise<string> {
+    const url = await this.urlRepository.getById(id);
 
     if (!url) {
       throw new Error('Url does not exist');
     }
 
     return getHostName(url.url);
+  }
+
+  private async tryToActivate(url: string): Promise<string> {
+    const record = (await this.urlRepository.getByContext({
+      url,
+    })) as UrlRecord;
+
+    if (record.isActive) {
+      throw new Error(`${url} already exists)`);
+    }
+
+    await this.urlRepository.updateByContext(record.id, {
+      isActive: true,
+    });
+
+    return record.id;
   }
 }
 
