@@ -9,7 +9,7 @@ import {
 export interface IUrlService {
   insert(url: string): Promise<string>;
   deactivateUrl(id: string): Promise<void>;
-  getById(id: string): Promise<string>;
+  getByIdHostname(id: string): Promise<string>;
 }
 
 export class UrlService implements IUrlService {
@@ -36,7 +36,7 @@ export class UrlService implements IUrlService {
     });
   }
 
-  async getById(id: string): Promise<string> {
+  async getByIdHostname(id: string): Promise<string> {
     const url = await this.urlRepository.getById(id);
 
     if (!url) {

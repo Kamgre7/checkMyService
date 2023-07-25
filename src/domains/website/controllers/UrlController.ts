@@ -32,7 +32,7 @@ export class UrlController implements IUrlController {
   downloadCsv = async (req: GetUrlReq, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const url = await this.urlService.getById(id);
+    const url = await this.urlService.getByIdHostname(id);
     const path = join(appConfig.csvFilePath, `${url}.csv`);
 
     res.download(path, (err) => {
