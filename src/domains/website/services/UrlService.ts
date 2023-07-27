@@ -1,27 +1,24 @@
 import { Prisma } from '@prisma/client';
 import { getHostName } from '../../../utils/getHostName';
-import {
-  IUrlRepository,
-  UrlRecord,
-  urlRepository,
-} from '../repository/UrlRepository';
+import { IUrlRepository, urlRepository } from '../repository/UrlRepository';
+import { UNIQUE_CODE_ERROR_PRISMA } from '../../../utils/utils';
 
 export interface IUrlService {
-  insert(url: string): Promise<string>;
+  create(url: string): Promise<string>;
   deactivateUrl(id: string): Promise<void>;
-  getByIdHostname(id: string): Promise<string>;
+  getHostnameById(id: string): Promise<string>;
 }
 
 export class UrlService implements IUrlService {
   constructor(private readonly urlRepository: IUrlRepository) {}
 
-  async insert(url: string): Promise<string> {
+  async create(url: string): Promise<string> {
     try {
-      return await this.urlRepository.insert(url);
+      return await this.urlRepository.create(url);
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2002'
+        error.code === UNIQUE_CODE_ERROR_PRISMA
       ) {
         return await this.tryToActivate(url);
       }
@@ -36,30 +33,30 @@ export class UrlService implements IUrlService {
     });
   }
 
-  async getByIdHostname(id: string): Promise<string> {
-    const url = await this.urlRepository.getById(id);
+  async getHostnameById(id: string): Promise<string> {
+    const urlRecord = await this.urlRepository.getById(id);
 
-    if (!url) {
+    if (!urlRecord) {
       throw new Error('Url does not exist');
     }
 
-    return getHostName(url.url);
+    return getHostName(urlRecord.url);
   }
 
   private async tryToActivate(url: string): Promise<string> {
-    const record = (await this.urlRepository.getByContext({
+    const urlRecord = (await this.urlRepository.getByContext({
       url,
-    })) as UrlRecord;
+    }))!;
 
-    if (record.isActive) {
+    if (urlRecord.isActive) {
       throw new Error(`${url} already exists)`);
     }
 
-    await this.urlRepository.updateByContext(record.id, {
+    await this.urlRepository.updateByContext(urlRecord.id, {
       isActive: true,
     });
 
-    return record.id;
+    return urlRecord.id;
   }
 }
 
