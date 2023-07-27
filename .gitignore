@@ -140,5 +140,6 @@ dist
 .svelte-kit
 .vscode
 
-db/db.sqlite
-csv/websiteStatus.csv
+src/db/db.sqlite
+csv
+prisma/migrations
