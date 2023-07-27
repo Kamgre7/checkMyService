@@ -1,7 +1,7 @@
 import { prisma } from '../../../db/db';
 
 export interface IUrlRepository {
-  insert(url: string): Promise<string>;
+  create(url: string): Promise<string>;
   getAll(): Promise<UrlRecord[]>;
   getActive(): Promise<UrlRecord[]>;
   getById(id: string): Promise<UrlRecord | null>;
@@ -18,7 +18,7 @@ export interface UrlRecord {
 export class UrlRepository implements IUrlRepository {
   constructor(private readonly urlList = prisma.urlList) {}
 
-  async insert(url: string): Promise<string> {
+  async create(url: string): Promise<string> {
     const record = await this.urlList.create({
       data: {
         url,

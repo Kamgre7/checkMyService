@@ -24,7 +24,7 @@ describe('Url Service', () => {
     };
 
     urlRepositoryMock = {
-      insert: jest.fn().mockResolvedValue(uuid()),
+      create: jest.fn().mockResolvedValue(uuid()),
       getAll: jest.fn().mockResolvedValue([activeUrlRecord, inactiveUrlRecord]),
       getActive: jest.fn().mockResolvedValue([activeUrlRecord]),
       getById: jest.fn().mockResolvedValue(activeUrlRecord),
@@ -40,25 +40,40 @@ describe('Url Service', () => {
   });
 
   it('Should call insert method of urlRepository, when adding new url', async () => {
-    await urlService.insert('https://www.yahoo.com');
+    await urlService.create('https://www.yahoo.com');
 
-    expect(urlRepositoryMock.insert).toBeCalledTimes(1);
+    expect(urlRepositoryMock.create).toBeCalledTimes(1);
   });
 
   it('Should call insert, getByContext, updateByContext method of urlRepository, when adding again url (inactive in database)', async () => {
-    urlRepositoryMock.insert = jest.fn().mockRejectedValueOnce(
+    urlRepositoryMock.create = jest.fn().mockRejectedValueOnce(
       new PrismaClientKnownRequestError('Some Prisma error message', {
         code: 'P2002',
         clientVersion: '',
       })
     );
 
-    const id = await urlService.insert(inactiveUrlRecord.url);
+    const id = await urlService.create(inactiveUrlRecord.url);
 
-    expect(urlRepositoryMock.insert).toBeCalledTimes(1);
+    expect(urlRepositoryMock.create).toBeCalledTimes(1);
     expect(urlRepositoryMock.getByContext).toBeCalledTimes(1);
     expect(urlRepositoryMock.updateByContext).toBeCalledTimes(1);
     expect(id).toBe(inactiveUrlRecord.id);
+  });
+
+  it('Should throw error when trying to add again existing url with isActive true flag', async () => {
+    inactiveUrlRecord.isActive = true;
+
+    urlRepositoryMock.create = jest.fn().mockRejectedValueOnce(
+      new PrismaClientKnownRequestError('Some Prisma error message', {
+        code: 'P2002',
+        clientVersion: '',
+      })
+    );
+
+    await expect(
+      urlService.create('https://www.youtube.com')
+    ).rejects.toThrow();
   });
 
   it('Should call updateByContext method of urlRepository, when updating urlRecord isActive status', async () => {
@@ -68,24 +83,9 @@ describe('Url Service', () => {
   });
 
   it('Should call getById method of urlRepository, when finding hostname using id. Should return url host name', async () => {
-    const result = await urlService.getByIdHostname(activeUrlRecord.id);
+    const result = await urlService.getHostnameById(activeUrlRecord.id);
 
     expect(urlRepositoryMock.getById).toBeCalledTimes(1);
     expect(result).toBe(getHostName(activeUrlRecord.url));
-  });
-
-  it('Should throw error when trying to add again existing url with isActive true flag', async () => {
-    inactiveUrlRecord.isActive = true;
-
-    urlRepositoryMock.insert = jest.fn().mockRejectedValueOnce(
-      new PrismaClientKnownRequestError('Some Prisma error message', {
-        code: 'P2002',
-        clientVersion: '',
-      })
-    );
-
-    await expect(
-      urlService.insert('https://www.youtube.com')
-    ).rejects.toThrow();
   });
 });

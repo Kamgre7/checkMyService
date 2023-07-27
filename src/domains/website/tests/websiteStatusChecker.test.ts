@@ -48,7 +48,7 @@ describe('Website status checker', () => {
     };
 
     urlRepositoryMock = {
-      insert: jest.fn().mockResolvedValue(uuid()),
+      create: jest.fn().mockResolvedValue(uuid()),
       getAll: jest.fn().mockResolvedValue([activeUrlRecord, inactiveUrlRecord]),
       getActive: jest.fn().mockResolvedValue([activeUrlRecord]),
       getById: jest.fn().mockResolvedValue(activeUrlRecord),

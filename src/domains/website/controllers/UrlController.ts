@@ -17,7 +17,7 @@ export class UrlController implements IUrlController {
 
   postUrl = async (req: PostUrlReq, res: Response): Promise<void> => {
     const { url } = req.body;
-    const id = await this.urlService.insert(url);
+    const id = await this.urlService.create(url);
 
     res.status(200).json(id);
   };
@@ -32,7 +32,7 @@ export class UrlController implements IUrlController {
   downloadCsv = async (req: GetUrlReq, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const url = await this.urlService.getByIdHostname(id);
+    const url = await this.urlService.getHostnameById(id);
     const path = join(appConfig.csvFilePath, `${url}.csv`);
 
     res.download(path, (err) => {
